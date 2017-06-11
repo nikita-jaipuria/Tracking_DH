@@ -33,16 +33,14 @@ const int FRAME_SERIALIZATION_VERSION = 0;
   class Frame {
   public:
     int serialization_version_;
-
     // Points for the object observed in a single frame, in local coordinates.
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
-
     // Time that this object was observed.
     double timestamp_;
 
     Frame(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud, double timestamp);
     Frame(std::istream& istrm);
-    void serialize(std::ostream& out) const;
+    void serialize(std::ostream& out) const; 
     bool deserialize(std::istream& istrm);
 
     //! Returns false if there were no points.
@@ -67,9 +65,10 @@ const int FRAME_SERIALIZATION_VERSION = 0;
     std::string label_;
     std::vector< boost::shared_ptr<Frame> > frames_;
     
-    //! Initializes with label == "unknown", and that's it.
+    //! Initializes with label == "unlabeled", and that's it.
     Track();
     Track(std::istream& istrm);
+    // Initializes according to user defined parameters
     Track(const std::string& label, const std::vector< boost::shared_ptr<Frame> >& frames);
 
     //! Reserves space in the vectors of velo centers, timestamps, and clouds.

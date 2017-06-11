@@ -33,6 +33,7 @@ namespace precision_tracking {
 
 namespace track_manager_color {
 
+// Creating initialization list for the constructor TrackManagerColor() for class TrackManagerColor; defined in track_manager_color.h
 TrackManagerColor::TrackManagerColor() :
   serialization_version_(TRACKMANAGER_SERIALIZATION_VERSION),
   tracks_(vector< boost::shared_ptr<Track> >())
@@ -83,16 +84,18 @@ bool TrackManagerColor::save(const string& filename) {
   return true;
 }
 
+// Returns maxmum number of clouds/track by iterating over all tracks
 size_t TrackManagerColor::getMaxNumClouds() const {
   size_t max_num_clouds = 0;
+  // Loop over all tracks one by one as tracks_ is a vector of the class Track defined in track_color_manager.h
   for(size_t i = 0; i < tracks_.size(); ++i) {
     if(tracks_[i]->frames_.size() > max_num_clouds)
-      max_num_clouds = tracks_[i]->frames_.size();
+      max_num_clouds = tracks_[i]->frames_.size(); // check number of frames (of class Frame) in i-th track (of class Track)
   }
   return max_num_clouds;
 }
 
-  
+// Returns total number of clouds across all tracks
 size_t TrackManagerColor::getNumClouds() const {
   size_t num = 0;
   for(size_t i = 0; i < tracks_.size(); ++i)
@@ -100,6 +103,7 @@ size_t TrackManagerColor::getNumClouds() const {
   return num;
 }
 
+// Returns number of labelled clouds across all tracks (assumption: frames belonging to a single track are either all labeled or all unlabeled)
 size_t TrackManagerColor::getNumLabeledClouds() const {
   size_t num = 0;
   for(size_t i = 0; i < tracks_.size(); ++i) {
@@ -115,7 +119,7 @@ void TrackManagerColor::serialize(ostream& out) {
   out << serialization_version_ << endl;
   for(size_t i=0; i<tracks_.size(); ++i) {
     printf("Serializing track %zu\n", i);
-    tracks_[i]->serialize(out);
+    tracks_[i]->serialize(out); // This serialize is a built-in C++ function, most probably within the boost library
   }
 }
 
@@ -132,6 +136,7 @@ bool TrackManagerColor::deserialize(istream& istrm, const int tracknum) {
   if(line.compare("serialization_version_") != 0)
     return false;
 
+// Check for serialization_version_ provided by user as being compatible/correct
   istrm >> serialization_version_;
   if(serialization_version_ != TRACKMANAGER_SERIALIZATION_VERSION) {
     cerr << "Expected TrackManager serialization_version_ == " << TRACKMANAGER_SERIALIZATION_VERSION;
@@ -194,10 +199,12 @@ bool TrackManagerColor::deserialize(istream& istrm) {
   return true;
 }
 
+// Return the negative of output of the function operator==
 bool TrackManagerColor::operator!=(const TrackManagerColor& tm) {
   return !operator==(tm);
 }
 
+// What are these global seeming variables serialization_version_ and tracks_  
 bool TrackManagerColor::operator==(const TrackManagerColor& tm) {
   if(serialization_version_ != tm.serialization_version_)
     return false;
@@ -211,7 +218,7 @@ bool TrackManagerColor::operator==(const TrackManagerColor& tm) {
 }
 
 double getTrackLength(const Track& tr) {
-  double z = tr.getMeanNumPoints() + tr.frames_[0]->cloud_->points.size();
+  double z = tr.getMeanNumPoints() + tr.frames_[0]->cloud_->points.size(); // Add number of points in the first frame (index 0) of query track to its mean number of points
   return (double) tr.frames_.size() + 1.0 / (1.0 + exp(-z / 10000.0)); // Break ties consistently with high probability.
 }
 
@@ -337,7 +344,8 @@ double Track::getMeanDistance() {
   }
   return total / (double)frames_.size();
 }
-   
+ 
+// Initialization list for constructor of class Track defined in track_manager_color.h  
 Track::Track(const std::string& label,
 			    const std::vector< boost::shared_ptr<Frame> >& frames) :
   serialization_version_(TRACK_SERIALIZATION_VERSION),
@@ -346,6 +354,7 @@ Track::Track(const std::string& label,
 {
 }
   
+//! Initializes with label == "unlabeled", and that's it. No frames.
 Track::Track() :
   serialization_version_(TRACK_SERIALIZATION_VERSION),
   label_("unlabeled")
@@ -402,6 +411,7 @@ bool Frame::operator==(const Frame& fr) {
   return true;
 }
 
+// Initialization list for constructor of class Frame defined in track_manager_color.h  
 Frame::Frame(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
     double timestamp) :
   serialization_version_(FRAME_SERIALIZATION_VERSION),
@@ -468,6 +478,7 @@ void Frame::serialize(std::ostream& out) const{
   serializePointCloud(*cloud_, out);
 }
 
+// Returns centroid of 3D point cloud
 Eigen::Vector3f Frame::getCentroid() {
   if(centroid_)
     return *centroid_;
@@ -484,6 +495,7 @@ Eigen::Vector3f Frame::getCentroid() {
   return *centroid_;
 }
 
+// Returns 2D bounding box for 3D point cloud
 Eigen::MatrixXf Frame::getBoundingBox() {
   if(bounding_box_)
     return *bounding_box_;
@@ -510,6 +522,7 @@ Eigen::MatrixXf Frame::getBoundingBox() {
   return *bounding_box_;
 }
 
+// Get the norm of 3D centroid of point cloud
 double Frame::getDistance() {
   Eigen::Vector3f centroid = getCentroid();
   return (centroid.cast<double>()).norm();
