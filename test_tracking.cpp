@@ -374,6 +374,27 @@ void testPrecisionTrackerColor(
   trackAndEvaluate(track_manager, gt_folder, params, true, false);
 }
 
+// Input to the following functions will be track_manager and gt_folder converted from 10Hz to 
+void testPrecisionTrackerColor5Hz(
+    const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
+    const string gt_folder) {
+  printf("\nTracking objects with our precision tracker using color (single-threaded). "
+         "This method should also be less accurate than the version with color at 10Hz but is slightly faster. Please wait (will be slow)...\n");
+  precision_tracking::Params params;
+  params.useColor = true;
+  trackAndEvaluate(track_manager, gt_folder, params, true, false);
+}
+
+void testPrecisionTrackerColor2Hz(
+    const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
+    const string gt_folder) {
+  printf("\nTracking objects with DH precision tracker using color (single-threaded) and reduced frequency of 2Hz. "
+         "This method should be less accurate than the version with color at 10Hz but much faster. Please wait (will be slow)...\n");
+  precision_tracking::Params params;
+  params.useColor = true;
+  trackAndEvaluate(track_manager, gt_folder, params, true, false);
+}
+
 int main(int argc, char **argv)
 {
   if (argc < 3) {
@@ -408,6 +429,12 @@ int main(int argc, char **argv)
   // Testing our precision tracker with color - should be even more accurate
   // but slow.
   testPrecisionTrackerColor(track_manager, gt_folder);
+
+  // Testing DH precision tracker with color - at reduced frequency of 5 Hz.
+  testPrecisionTrackerColor5Hz(track_manager, gt_folder);
+
+  // Testing DH precision tracker with color - at reduced frequency of 2 Hz.
+  testPrecisionTrackerColor2Hz(track_manager, gt_folder);
 
   return 0;
 }
