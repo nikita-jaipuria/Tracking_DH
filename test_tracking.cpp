@@ -111,7 +111,13 @@ void evaluateTracking(const std::vector<TrackResults>& velocity_estimates,
           track_results.estimated_velocities[j];
 
       const double estimated_velocity_magnitude = estimated_velocity.norm();
-      const double gt_velocity_magnitude = gt_velocities[j-skipped]; // account for the skipped frames when comparing the estimated_velocity with ground truth as read off of text file for i-th track in gtFolder
+
+      // THE else part is what was there initially, everything else within if has been added to account for the reduced frequency of 5Hz
+      if (gt_velocities.size()*0.65 > track_results.estimated_velocities.size()) {
+        const double gt_velocity_magnitude = gt_velocities[(j-skipped)*2];
+      } else {
+        const double gt_velocity_magnitude = gt_velocities[j-skipped];
+      }
       const double error = estimated_velocity_magnitude - gt_velocity_magnitude;
 
       errors.push_back(error);
