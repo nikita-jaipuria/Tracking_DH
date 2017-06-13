@@ -374,7 +374,38 @@ void testPrecisionTrackerColor(
   trackAndEvaluate(track_manager, gt_folder, params, true, false);
 }
 
-// Input to the following functions will be track_manager and gt_folder converted from 10Hz to 
+// Converting track_manager and gt_folder to reduced 5Hz frequency.
+void reducedFrequency5(
+    const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
+    precision_tracking::track_manager_color::TrackManagerColor& track_manager5) {
+  printf("\nConverting the tracks of colored laser point clouds from 10Hz to 5Hz");
+
+  // Extract pointer to tracks.
+  const std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Track> >& tracks =
+      track_manager.tracks_;
+  std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Track> >& tracks5 =
+      track_manager5.tracks_;
+
+  // Iterate over all tracks.
+  for (size_t i = 0; i < tracks.size(); ++i) {
+    const boost::shared_ptr<precision_tracking::track_manager_color::Track>& track = tracks[i];
+    boost::shared_ptr<precision_tracking::track_manager_color::Track>& track5(new Track());
+    track5.track_num_ = track.track_num_;
+    track5.label_ = track.label_;
+    // Extract frames.
+    const std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Frame> > frames =
+        track->frames_;
+    std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Frame> > subsframes;
+    for (size_t j = 0; j < frames.size(); ++j) {
+      if (j % 2 == 0) continue;
+      subsframes.push_back(frames[j]);
+    }
+    track5->frames_ = subsframes;
+    tracks5_.push_back(track5);
+  }
+}
+
+// Input to the following functions will be track_manager and gt_folder converted from 10Hz to 5Hz
 void testPrecisionTrackerColor5Hz(
     const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
     const string gt_folder) {
@@ -407,6 +438,9 @@ int main(int argc, char **argv)
 
   // Load tracks.
   printf("Loading file: %s\n", color_tm_file.c_str());
+
+  // Use the constructor for class TrackManagerColor which takes as input a filename
+  // Function definiton for this particular constructor can be found in track_manager_color.cpp searching TrackManagerColor::TrackManagerColor(const string& filename)
   precision_tracking::track_manager_color::TrackManagerColor track_manager(color_tm_file);
   printf("Found %zu tracks\n", track_manager.tracks_.size());
 
@@ -430,11 +464,26 @@ int main(int argc, char **argv)
   // but slow.
   testPrecisionTrackerColor(track_manager, gt_folder);
 
+  // Use default constructor TrackManagerColor() defined in track_manager_color.cpp, which initializes the member tracks_ to an empty vector of the class Track as defined in TrackManaagerColor.h
+  printf("\nInitializing empty track_manager class for storing and handling reduced 5Hz tracks"
+         "Should have no tracks if successfully initialized.\n");
+  precision_tracking::track_manager_color::TrackManagerColor track_manager5();
+  printf("\nFound %zu tracks", track_manager.tracks_.size());
+
   // Convert track_manager and gt_folder to reduced 5Hz frequency.
-  reducedFrequency(track_manager, gt_folder);
+  printf("\n\nConverting the tracks and ground-truth from 10Hz to 5Hz");
+  reducedFrequency5(track_manager, track_manager5);
+
+  printf("\nChecking number of reduced tracks, should be the same as before..."
+         "Found %zu tracks\n", track_manager5.tracks_.size());
+  printf("\n\nChecking number of frames for randomly selected tracks, should be half of the original");
+  printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[1].frames_.size(), track_manager5.tracks_[1].frames_.size(), track_manager.tracks_[1].track_num_;
+  printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[121].frames_.size(), track_manager5.tracks_[121].frames_.size(), track_manager.tracks_[121].track_num_;
+  printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[256].frames_.size(), track_manager5.tracks_[256].frames_.size(), track_manager.tracks_[256].track_num_;
+  printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[398].frames_.size(), track_manager5.tracks_[398].frames_.size(), track_manager.tracks_[398].track_num_;
 
   // Testing DH precision tracker with color - at reduced frequency of 5Hz.
-  testPrecisionTrackerColor5Hz(track_manager, gt_folder);
+  testPrecisionTrackerColor5Hz(track_manager5, gt_folder);
 
   // // Testing DH precision tracker with color - at reduced frequency of 2Hz.
   // testPrecisionTrackerColor2Hz(track_manager, gt_folder);
