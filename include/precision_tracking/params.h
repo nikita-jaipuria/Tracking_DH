@@ -37,7 +37,7 @@ struct Params
   /// so there is no point in sampling at a much finer scale.
   /// The minimum sampling resolution is set to be no smaller than
   /// sensor_resolution / kMinResFactor.
-  double kMinResFactor;
+  double kMinResFactor; // like a safety factor to amp up the sampling resolution by a certain factor over and above the sensor resolution
 
   /// The desired sampling resolution.
   double kDesiredSamplingResolution;

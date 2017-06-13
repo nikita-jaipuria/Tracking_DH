@@ -47,7 +47,7 @@ public:
 
 	double computeScore(const TransformComponents& components) const;
 
-  // Compute the score given the x,y, and z components.
+  // Compute the score given the x,y, and z components only.
   double computeScore(const double x, const double y, const double z) const;
 
   Eigen::Vector3f get_mean_velocity() const {

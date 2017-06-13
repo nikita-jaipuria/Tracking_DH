@@ -22,6 +22,7 @@ public:
   DownSampler(const bool stochastic, const Params *params);
   virtual ~DownSampler();
 
+  // If the bool member variable stochastic_ is 1, use the member function downSamplePointsStochastic, else use the member function downSamplePointsDeterministic
   void downSamplePoints(
       const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& points,
       const int target_num_points,
