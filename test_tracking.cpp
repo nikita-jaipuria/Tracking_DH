@@ -313,7 +313,7 @@ void trackAndEvaluate(
   // Find bad frames that we want to ignore.
   find_bad_frames(track_manager, &velocity_estimates);
 
-  // Evaluate the tracking accuracy.
+  // Evaluate the tracking accuracy for all objects in the sensor field of view.
   boost::shared_ptr<std::vector<bool> > empty_filter;
   evaluateTracking(velocity_estimates, gt_folder, empty_filter);
 
@@ -385,15 +385,15 @@ void testPrecisionTrackerColor5Hz(
   trackAndEvaluate(track_manager, gt_folder, params, true, false);
 }
 
-void testPrecisionTrackerColor2Hz(
-    const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
-    const string gt_folder) {
-  printf("\nTracking objects with DH precision tracker using color (single-threaded) and reduced frequency of 2Hz. "
-         "This method should be less accurate than the version with color at 10Hz but much faster. Please wait (will be slow)...\n");
-  precision_tracking::Params params;
-  params.useColor = true;
-  trackAndEvaluate(track_manager, gt_folder, params, true, false);
-}
+// void testPrecisionTrackerColor2Hz(
+//     const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
+//     const string gt_folder) {
+//   printf("\nTracking objects with DH precision tracker using color (single-threaded) and reduced frequency of 2Hz. "
+//          "This method should be less accurate than the version with color at 10Hz but much faster. Please wait (will be slow)...\n");
+//   precision_tracking::Params params;
+//   params.useColor = true;
+//   trackAndEvaluate(track_manager, gt_folder, params, true, false);
+// }
 
 int main(int argc, char **argv)
 {
@@ -430,11 +430,14 @@ int main(int argc, char **argv)
   // but slow.
   testPrecisionTrackerColor(track_manager, gt_folder);
 
-  // Testing DH precision tracker with color - at reduced frequency of 5 Hz.
+  // Convert track_manager and gt_folder to reduced 5Hz frequency.
+  reducedFrequency(track_manager, gt_folder);
+
+  // Testing DH precision tracker with color - at reduced frequency of 5Hz.
   testPrecisionTrackerColor5Hz(track_manager, gt_folder);
 
-  // Testing DH precision tracker with color - at reduced frequency of 2 Hz.
-  testPrecisionTrackerColor2Hz(track_manager, gt_folder);
+  // // Testing DH precision tracker with color - at reduced frequency of 2Hz.
+  // testPrecisionTrackerColor2Hz(track_manager, gt_folder);
 
   return 0;
 }
