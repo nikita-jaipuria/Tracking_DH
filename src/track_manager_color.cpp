@@ -64,6 +64,9 @@ TrackManagerColor::TrackManagerColor(const std::string& filename, const int trac
 		throw 1;
 }
 
+// THIS IS THE CONSTRUCTOR BEING USED IN test_tracking.cpp
+// Focus on this for creating reduced frequency track_manager in test_tracking.cpp
+
 TrackManagerColor::TrackManagerColor(const string& filename) :
   serialization_version_(TRACKMANAGER_SERIALIZATION_VERSION),
   tracks_(vector< boost::shared_ptr<Track> >())
@@ -163,7 +166,7 @@ bool TrackManagerColor::deserialize(istream& istrm, const int tracknum) {
   return true;
 }
 
-
+//THIS IS THE DESERIALIZE THAT NEEDS TO BE FOCUSED UPON FOR REDUCED FREQUENCY
 bool TrackManagerColor::deserialize(istream& istrm) {
   tracks_.clear();
   string line;
