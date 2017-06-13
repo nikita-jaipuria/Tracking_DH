@@ -111,13 +111,14 @@ void evaluateTracking(const std::vector<TrackResults>& velocity_estimates,
           track_results.estimated_velocities[j];
 
       const double estimated_velocity_magnitude = estimated_velocity.norm();
-
-      // THE else part is what was there initially, everything else within if has been added to account for the reduced frequency of 5Hz
-      if (gt_velocities.size()*0.65 > track_results.estimated_velocities.size()) {
-        const double gt_velocity_magnitude = gt_velocities[(j-skipped)*2];
-      } else {
-        const double gt_velocity_magnitude = gt_velocities[j-skipped];
-      }
+      // const double gt_velocity_magnitude = 0.0;
+      // // The else part is what was there initially, everything else within if has been added to account for the reduced frequency of 5Hz
+      // if (gt_velocities.size()*0.65 > track_results.estimated_velocities.size()) {
+      //   const double gt_velocity_magnitude = gt_velocities[(j-skipped)*2];
+      // } else {
+      //   const double gt_velocity_magnitude = gt_velocities[j-skipped];
+      // }
+      const double gt_velocity_magnitude = gt_velocities[j-skipped];
       const double error = estimated_velocity_magnitude - gt_velocity_magnitude;
 
       errors.push_back(error);
@@ -387,27 +388,24 @@ void reducedFrequency5(
   printf("\nConverting the tracks of colored laser point clouds from 10Hz to 5Hz");
 
   // Extract pointer to tracks.
-  const std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Track> >& tracks =
+  std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Track> > tracks =
       track_manager.tracks_;
-  std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Track> >& tracks5 =
+  std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Track> > tracks5 =
       track_manager5.tracks_;
 
   // Iterate over all tracks.
   for (size_t i = 0; i < tracks.size(); ++i) {
-    const boost::shared_ptr<precision_tracking::track_manager_color::Track>& track = tracks[i];
-    boost::shared_ptr<precision_tracking::track_manager_color::Track>& track5(new Track());
-    track5.track_num_ = track.track_num_;
-    track5.label_ = track.label_;
+    boost::shared_ptr<precision_tracking::track_manager_color::Track>& track = tracks[i];
     // Extract frames.
-    const std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Frame> > frames =
+    std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Frame> > frames =
         track->frames_;
     std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Frame> > subsframes;
     for (size_t j = 0; j < frames.size(); ++j) {
       if (j % 2 == 0) continue;
       subsframes.push_back(frames[j]);
     }
-    track5->frames_ = subsframes;
-    tracks5_.push_back(track5);
+    boost::shared_ptr<precision_tracking::track_manager_color::Track> track5(new precision_tracking::track_manager_color::Track(track->label_, subsframes));
+    tracks5.push_back(track5);
   }
 }
 
@@ -422,15 +420,15 @@ void testPrecisionTrackerColor5Hz(
   trackAndEvaluate(track_manager, gt_folder, params, true, false);
 }
 
-// void testPrecisionTrackerColor2Hz(
-//     const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
-//     const string gt_folder) {
-//   printf("\nTracking objects with DH precision tracker using color (single-threaded) and reduced frequency of 2Hz. "
-//          "This method should be less accurate than the version with color at 10Hz but much faster. Please wait (will be slow)...\n");
-//   precision_tracking::Params params;
-//   params.useColor = true;
-//   trackAndEvaluate(track_manager, gt_folder, params, true, false);
-// }
+void testPrecisionTrackerColor2Hz(
+    const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
+    const string gt_folder) {
+  printf("\nTracking objects with DH precision tracker using color (single-threaded) and reduced frequency of 2Hz. "
+         "This method should be less accurate than the version with color at 10Hz but much faster. Please wait (will be slow)...\n");
+  precision_tracking::Params params;
+  params.useColor = true;
+  trackAndEvaluate(track_manager, gt_folder, params, true, false);
+}
 
 int main(int argc, char **argv)
 {
@@ -482,11 +480,11 @@ int main(int argc, char **argv)
 
   printf("\nChecking number of reduced tracks, should be the same as before..."
          "Found %zu tracks\n", track_manager5.tracks_.size());
-  printf("\n\nChecking number of frames for randomly selected tracks, should be half of the original");
-  printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[1].frames_.size(), track_manager5.tracks_[1].frames_.size(), track_manager.tracks_[1].track_num_;
-  printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[121].frames_.size(), track_manager5.tracks_[121].frames_.size(), track_manager.tracks_[121].track_num_;
-  printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[256].frames_.size(), track_manager5.tracks_[256].frames_.size(), track_manager.tracks_[256].track_num_;
-  printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[398].frames_.size(), track_manager5.tracks_[398].frames_.size(), track_manager.tracks_[398].track_num_;
+  // printf("\n\nChecking number of frames for randomly selected tracks, should be half of the original");
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[1].frames_.size(), track_manager5.tracks_[1].frames_.size(), track_manager.tracks_[1].track_num_;
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[121].frames_.size(), track_manager5.tracks_[121].frames_.size(), track_manager.tracks_[121].track_num_;
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[256].frames_.size(), track_manager5.tracks_[256].frames_.size(), track_manager.tracks_[256].track_num_;
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d", track_manager.tracks_[398].frames_.size(), track_manager5.tracks_[398].frames_.size(), track_manager.tracks_[398].track_num_;
 
   // Testing DH precision tracker with color - at reduced frequency of 5Hz.
   testPrecisionTrackerColor5Hz(track_manager5, gt_folder);
