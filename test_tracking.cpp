@@ -73,7 +73,7 @@ void computeErrorStatistics(const std::vector<double>& errors) {
   printf("RMS error: %lf m/s\n", rms_error);
 }
 
-// Compute error in magnitude of estimated velocity fame-wise for every track & overall RMS error
+// Compute error in magnitude of estimated velocity fame-wise for every track and then compute overall RMS error
 void evaluateTracking(const std::vector<TrackResults>& velocity_estimates,
                       const string& gt_folder,
                       boost::shared_ptr<std::vector<bool> > filter) {
@@ -121,7 +121,7 @@ void evaluateTracking(const std::vector<TrackResults>& velocity_estimates,
   computeErrorStatistics(errors);
 }
 
-// Filter to only evaluate on objects within a given distance (in meters). Since the centroid is computed in the local frame of the point cloud sensor, the centroid of the point clouds of a particular frame is a good enough measure of the distance of the object being tracked from the ego vehicle
+// Filter to only evaluate on objects within a given distance (in meters).
 void getWithinDistance(
     const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
     const double max_distance, std::vector<bool>& filter) {
@@ -148,7 +148,7 @@ void getWithinDistance(
 }
 
 // Ingore frames in the back where half of the car was recorded at
-// the beginning of a spin and the other half was recorded at the end of a spin of the Velodyne/point cloud sensor.
+// the beginning of a spin and the other half was recorded at the end of a spin.
 // Also ignore frames where the time difference is extremely small, essentially
 // because the car moved between the end of one spin to the beginning of the
 // next.  For such frames, estimating the velocity is prone to errors
@@ -161,19 +161,19 @@ void find_bad_frames(const precision_tracking::track_manager_color::TrackManager
 
   // Iterate over all tracks.
   for (size_t i = 0; i < tracks.size(); ++i) {
-    // Extract frames in i-th track
+    // Extract frames.
     const boost::shared_ptr<precision_tracking::track_manager_color::Track>& track = tracks[i];
     std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Frame> > frames =
         track->frames_;
 
-    // Structure for storing estimated velocities for i-th track
+    // Structure for storing estimated velocities for this track.
     TrackResults& track_estimates = (*velocity_estimates)[i];
 
     bool skip_next = false;
     double prev_angle = 0;
     double prev_time = 0;
 
-    // Iterate over all frames for i-th track
+    // Iterate over all frames for this track.
     for (size_t j = 0; j < frames.size(); ++j) {
       boost::shared_ptr<precision_tracking::track_manager_color::Frame> frame = frames[j];
 
@@ -216,11 +216,9 @@ void track(
            const bool use_precision_tracker,
            const bool do_parallel,
            std::vector<TrackResults>* velocity_estimates) {
-  // Extract tracks from track_manager
   const std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Track> >& tracks =
       track_manager.tracks_;
 
-  // Find total number of frames across all tracks
   int total_num_frames = 0;
   for (size_t i = 0; i < tracks.size(); ++i) {
     total_num_frames += tracks[i]->frames_.size();
@@ -228,7 +226,6 @@ void track(
 
   const int num_threads = do_parallel ? 8 : 1;
 
-  // Create a vector of the struct Tracker defined in tracker.h
   std::vector<precision_tracking::Tracker> trackers;
   for (int i = 0; i < num_threads; ++i) {
     precision_tracking::Tracker tracker(&params);
@@ -257,14 +254,14 @@ void track(
     // Reset the tracker for this new track.
     tracker.clear();
 
-    // Extract frames for i-th track.
+    // Extract frames.
     const boost::shared_ptr<precision_tracking::track_manager_color::Track>& track = tracks[i];
     const std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Frame> > frames =
         track->frames_;
 
     // Structure for storing estimated velocities for this track.
     TrackResults track_estimates;
-    track_estimates.track_num = track->track_num_; // Denotes the number of the track being analyzed.
+    track_estimates.track_num = track->track_num_;
 
     // Iterate over all frames for this track.
     for (size_t j = 0; j < frames.size(); ++j) {
@@ -384,7 +381,7 @@ int main(int argc, char **argv)
     return (1);
   }
 
-  string color_tm_file = argv[1]; // test.tm has color values in it, the point cloud is XYZRGBD
+  string color_tm_file = argv[1];
   string gt_folder = argv[2];
 
   // Load tracks.

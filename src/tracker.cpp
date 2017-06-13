@@ -13,6 +13,7 @@
 
 namespace precision_tracking {
 
+// Default constructor, does not allocate a precision tracker. Uses just the KF motion model to track.
 Tracker::Tracker(const Params *params)
   : params_(params),
     previousModel_(new pcl::PointCloud<pcl::PointXYZRGB>),
@@ -21,12 +22,15 @@ Tracker::Tracker(const Params *params)
   motion_model_.reset(new MotionModel(params_));
 }
 
+// Reset the motion model to default and re-initialize the object point cloud
 void Tracker::clear()
 {
   motion_model_.reset(new MotionModel(params_));
   previousModel_->clear();
 }
 
+// Estimates the velocity of an object.  Call this function each
+// time the object is observed.
 void Tracker::addPoints(
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& current_points,
     const double current_timestamp,
@@ -40,7 +44,7 @@ void Tracker::addPoints(
               &alignment_probability);
 }
 
-
+// Same as above, but also returns alignment probability
 void Tracker::addPoints(
     const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& current_points,
     const double current_timestamp,
@@ -49,7 +53,7 @@ void Tracker::addPoints(
     Eigen::Vector3f* estimated_velocity,
     double* alignment_probability)
 {
-  // Do not align if there are no points.
+  // Do not align if there are no points. Return zero estimated velocity.
   if (current_points->size() == 0){
     printf("No points - cannot align.\n");
     *estimated_velocity = Eigen::Vector3f::Zero();
@@ -57,10 +61,10 @@ void Tracker::addPoints(
   }
 
   if (previousModel_->empty()) {
-    // No previous points - just creating initial model.
+    // No previous points - just creating initial model. Initialize estimated velocity to zero to enable its computation the next time object is observed.
     *estimated_velocity = Eigen::Vector3f::Zero();
   } else {
-    const double timestamp_diff = current_timestamp - prev_timestamp_;
+    const double timestamp_diff = current_timestamp - prev_timestamp_; // prev_timestamp_ is a protected member variable within the class Tracker
 
     // Propogate the motion model forward to estimate the new position.
     motion_model_->propagate(timestamp_diff);
