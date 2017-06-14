@@ -381,7 +381,7 @@ void testPrecisionTrackerColor(
   trackAndEvaluate(track_manager, gt_folder, params, true, false);
 }
 
-// Converting track_manager and gt_folder to reduced 5Hz frequency.
+// Converting track_manager to reduced 5Hz frequency.
 void reducedFrequency5(
     const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
     precision_tracking::track_manager_color::TrackManagerColor& track_manager5) {
@@ -410,6 +410,38 @@ void reducedFrequency5(
     tracks5.push_back(track5);
   }
   track_manager5.tracks_ = tracks5;
+}
+
+// Converting track_manager to reduced 5Hz frequency.
+void reducedFrequency2(
+    const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
+    precision_tracking::track_manager_color::TrackManagerColor& track_manager2) {
+  printf("\nConverting %zu tracks of colored laser point clouds from 10Hz to 2Hz and storing it in an empty list, currently having %zu tracks\n", track_manager.tracks_.size(), track_manager2.tracks_.size());
+
+  // Extract pointer to tracks for both original 10Hz and currently empty 5Hz list of tracks
+  std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Track> > tracks =
+      track_manager.tracks_;
+  std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Track> > tracks2 =
+      track_manager2.tracks_;
+
+  // Iterate over all tracks.
+  for (size_t i = 0; i < tracks.size(); ++i) {
+    boost::shared_ptr<precision_tracking::track_manager_color::Track>& track = tracks[i];
+    // Extract frames.
+    std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Frame> > frames =
+        track->frames_;
+    std::vector< boost::shared_ptr<precision_tracking::track_manager_color::Frame> > subsframes;
+    for (size_t j = 0; j < frames.size(); ++j) {
+      if (j % 5 == 0) {
+        subsframes.push_back(frames[j]);
+      }
+    }
+    boost::shared_ptr<precision_tracking::track_manager_color::Track> track2(new precision_tracking::track_manager_color::Track(track->label_, subsframes));
+    int track2_num = track->track_num_;
+    track2->track_num_ = track2_num;
+    tracks2.push_back(track2);
+  }
+  track_manager2.tracks_ = tracks2;
 }
 
 // Input to the following functions will be track_manager and gt_folder converted from 10Hz to 5Hz
@@ -451,8 +483,8 @@ int main(int argc, char **argv)
   precision_tracking::track_manager_color::TrackManagerColor track_manager(color_tm_file);
   printf("Found %zu tracks\n", track_manager.tracks_.size());
 
-  // Track objects and evaluate the accuracy.
-  printf("Tracking objects - please wait...\n\n");
+  // // Track objects and evaluate the accuracy.
+  // printf("Tracking objects - please wait...\n\n");
 
   // // Testing the centroid-based Kalman filter baseline method - should be
   // // very fast but not very accurate.
@@ -481,13 +513,30 @@ int main(int argc, char **argv)
   printf("\n\nConverting tracks from 10Hz to 5Hz");
   reducedFrequency5(track_manager, track_manager5);
 
-  printf("\nChecking number of reduced tracks, should be the same as before..."
-         "\nFound %zu tracks", track_manager5.tracks_.size());
-  printf("\n\nChecking number of frames for randomly selected tracks, should be half of the original");
-  printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[1]->frames_.size(), track_manager5.tracks_[1]->frames_.size(), track_manager.tracks_[1]->track_num_, track_manager5.tracks_[1]->track_num_);
-  printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[121]->frames_.size(), track_manager5.tracks_[121]->frames_.size(), track_manager.tracks_[121]->track_num_, track_manager5.tracks_[121]->track_num_);
-  printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[256]->frames_.size(), track_manager5.tracks_[256]->frames_.size(), track_manager.tracks_[256]->track_num_, track_manager5.tracks_[256]->track_num_);
-  printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[398]->frames_.size(), track_manager5.tracks_[398]->frames_.size(), track_manager.tracks_[398]->track_num_, track_manager5.tracks_[398]->track_num_);
+  // printf("\nChecking number of reduced tracks, should be the same as before..."
+  //        "\nFound %zu tracks", track_manager5.tracks_.size());
+  // printf("\n\nChecking number of frames for randomly selected tracks, should be half of the original");
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[1]->frames_.size(), track_manager5.tracks_[1]->frames_.size(), track_manager.tracks_[1]->track_num_, track_manager5.tracks_[1]->track_num_);
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[121]->frames_.size(), track_manager5.tracks_[121]->frames_.size(), track_manager.tracks_[121]->track_num_, track_manager5.tracks_[121]->track_num_);
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[256]->frames_.size(), track_manager5.tracks_[256]->frames_.size(), track_manager.tracks_[256]->track_num_, track_manager5.tracks_[256]->track_num_);
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[398]->frames_.size(), track_manager5.tracks_[398]->frames_.size(), track_manager.tracks_[398]->track_num_, track_manager5.tracks_[398]->track_num_);
+
+  // printf("\n\nInitializing empty track_manager class for storing and handling reduced 2Hz tracks."
+  //        "\nShould have no tracks if successfully initialized.");
+  // precision_tracking::track_manager_color::TrackManagerColor track_manager2;
+  // printf("\nFound %zu tracks compatible with %d serialization version", track_manager2.tracks_.size(), track_manager2.serialization_version_);
+
+  // // Convert track_manager and gt_folder to reduced 5Hz frequency.
+  // printf("\n\nConverting tracks from 10Hz to 2Hz");
+  // reducedFrequency2(track_manager, track_manager2);
+
+  // printf("\nChecking number of reduced tracks, should be the same as before..."
+  //        "\nFound %zu tracks", track_manager2.tracks_.size());
+  // printf("\n\nChecking number of frames for randomly selected tracks, should be one-fifth of the original");
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[1]->frames_.size(), track_manager2.tracks_[1]->frames_.size(), track_manager.tracks_[1]->track_num_, track_manager2.tracks_[1]->track_num_);
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[121]->frames_.size(), track_manager2.tracks_[121]->frames_.size(), track_manager.tracks_[121]->track_num_, track_manager2.tracks_[121]->track_num_);
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[256]->frames_.size(), track_manager2.tracks_[256]->frames_.size(), track_manager.tracks_[256]->track_num_, track_manager2.tracks_[256]->track_num_);
+  // printf("\nFound %zu frames and %zu reduced frames in track number %d and %d", track_manager.tracks_[398]->frames_.size(), track_manager2.tracks_[398]->frames_.size(), track_manager.tracks_[398]->track_num_, track_manager2.tracks_[398]->track_num_);
 
   // // Testing DH precision tracker with color - at reduced frequency of 5Hz.
   // testPrecisionTrackerColor5Hz(track_manager5, gt_folder);
