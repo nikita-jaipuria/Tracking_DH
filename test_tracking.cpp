@@ -420,15 +420,15 @@ void testPrecisionTrackerColor5Hz(
   trackAndEvaluate(track_manager, gt_folder, params, true, false);
 }
 
-void testPrecisionTrackerColor2Hz(
-    const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
-    const string gt_folder) {
-  printf("\nTracking objects with DH precision tracker using color (single-threaded) and reduced frequency of 2Hz. "
-         "This method should be less accurate than the version with color at 10Hz but much faster. Please wait (will be slow)...\n");
-  precision_tracking::Params params;
-  params.useColor = true;
-  trackAndEvaluate(track_manager, gt_folder, params, true, false);
-}
+// void testPrecisionTrackerColor2Hz(
+//     const precision_tracking::track_manager_color::TrackManagerColor& track_manager,
+//     const string gt_folder) {
+//   printf("\nTracking objects with DH precision tracker using color (single-threaded) and reduced frequency of 2Hz. "
+//          "This method should be less accurate than the version with color at 10Hz but much faster. Please wait (will be slow)...\n");
+//   precision_tracking::Params params;
+//   params.useColor = true;
+//   trackAndEvaluate(track_manager, gt_folder, params, true, false);
+// }
 
 int main(int argc, char **argv)
 {
@@ -471,7 +471,7 @@ int main(int argc, char **argv)
   // Use default constructor TrackManagerColor() defined in track_manager_color.cpp, which initializes the member tracks_ to an empty vector of the class Track as defined in TrackManaagerColor.h
   printf("\nInitializing empty track_manager class for storing and handling reduced 5Hz tracks"
          "Should have no tracks if successfully initialized.\n");
-  precision_tracking::track_manager_color::TrackManagerColor track_manager5();
+  precision_tracking::track_manager_color::TrackManagerColor track_manager5;
   printf("\nFound %zu tracks", track_manager.tracks_.size());
 
   // Convert track_manager and gt_folder to reduced 5Hz frequency.
