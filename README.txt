@@ -6,7 +6,7 @@ TO DO
 4) reducedFrequency is only copying the reduced frames from 10Hz track to 5Hz track and members label_ and serialization_version_, what about the member track_num_ -- done
 5) commented out check lines in main, resolve pointer issue -- done
 6) check whether or not timestamps_ of frames have been copied correctly from track_manager to track_manager5 and track_manager2 --
-7) check expected behaviour of RMS error for 5Hz and 2Hz colored point cloud trackind --
+7) check expected behaviour of RMS error for 5Hz and 2Hz colored point cloud trackind -- done
 
 
 NOTES
